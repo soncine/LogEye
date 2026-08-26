@@ -117,3 +117,40 @@ df['primeiro_login'] = df['login_anterior'].isna().astype(int)
 mediana_tempo = df['tempo_desde_ultimo_login'].median()
 df['tempo_desde_ultimo_login'] = (df['tempo_desde_ultimo_login'].fillna(mediana_tempo))
 
+#Criando informações de horario com timestamp
+df['hora_login'] = df['timestamp_login'].dt.hour
+
+df['dia_semana'] = df['timestamp_login'].dt.day_of_week
+
+df['fim_de_semana'] = (df['dia_semana'] >= 5).astype(int)
+
+df['login_madrugada'] = ((df['hora_login'] >= 0) & (df['hora_login'] <= 5)).astype(int)
+
+#Criando o protagonista login suspeito
+probabilidade_suspeito = np.full(
+    quantidade_logins,
+    0.01
+)
+aumento_tentativas = df['tentativas_falhas'] * 0.015
+probabilidade_suspeito += aumento_tentativas
+
+aumento_novo_dispositivo = df['novo_dispositivo'] * 0.05
+probabilidade_suspeito += aumento_novo_dispositivo
+
+aumento_novo_ip = df['novo_ip'] * 0.04
+probabilidade_suspeito += aumento_novo_ip
+
+aumento_vpn = df['vpn_proxy'] * 0.03
+probabilidade_suspeito += aumento_vpn
+
+aumento_pais_diferente = df['pais_diferente'] * 0.08
+probabilidade_suspeito += aumento_pais_diferente
+
+df['distancia_log'] = np.log1p(df['distancia_km'])
+limite_distancia = np.log1p(100)
+excesso_distancia = np.clip(df['distancia_log'] - limite_distancia, 0, None)
+aumento_distancia = excesso_distancia * 0.015
+probabilidade_suspeito += aumento_distancia
+
+tempo_horas = df['tempo_desde_ultimo_login'] / 60
+df['login_recente'] = ((df['tempo_desde_ultimo_login'] <= 360) & (df['primeiro_login'] == 0)).astype(int)
