@@ -154,3 +154,24 @@ probabilidade_suspeito += aumento_distancia
 
 tempo_horas = df['tempo_desde_ultimo_login'] / 60
 df['login_recente'] = ((df['tempo_desde_ultimo_login'] <= 360) & (df['primeiro_login'] == 0)).astype(int)
+df['mudanca_contexto'] = df['novo_dispositivo'] + df['novo_ip'] + df['pais_diferente']
+df['mudanca_contexto_rapida'] = ((df['login_recente'] == 1) & (df['mudanca_contexto'] >= 2)).astype(int)
+aumento_mudanca_rapida = df['mudanca_contexto_rapida'] * 0.12
+probabilidade_suspeito += aumento_mudanca_rapida
+
+aumento_madrugada = df['login_madrugada'] * 0.02
+probabilidade_suspeito += aumento_madrugada
+
+login_suspeito = np.random.binomial(n=1, p=probabilidade_suspeito, size=quantidade_logins)
+df['login_suspeito'] = login_suspeito
+
+df_final = df.drop(columns=[
+    'login_anterior', 'hora_login', 'dia_semana', 'fim_de_semana', 'login_madrugada', 'distancia_log', 'login_recente', 'mudanca_contexto', 'mudanca_contexto_rapida'
+])
+
+df_final.to_csv(
+    'data/logins.csv',
+    index=False
+)
+print('Dataset gerado com sucesso!')
+print(df_final.shape)
