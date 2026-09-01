@@ -614,7 +614,7 @@ Essas ações não são executadas automaticamente pelo modelo nesta versão.
 ### 1. Clonar o repositório
 
 ```bash
-git clone <https://github.com/soncine/LogEye>
+git clone https://github.com/soncine/LogEye.git
 cd LogEye
 ```
 
